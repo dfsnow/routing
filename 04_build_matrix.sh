@@ -6,7 +6,7 @@ tags="motorway,trunk,primary,secondary,tertiary,unclassified,residential,living_
      service,motorway_link,trunk_link,primary_link,secondary_link,tertiary_link"
 
 # Downloads the latest North America extract if it doesn't exist
-if [ ! -f "$file" ]; then 
+if [ ! -f "$file" ]; then
     wget https://download.geofabrik.de/north-america-latest.osm.pbf
 fi
 
@@ -61,7 +61,7 @@ for x in $(find ./counties -name "*.geojson" -type f); do
 	psql -d batch_network -U snow -a -f helper_04_connected_components.sql
 
 	# KNN matching for all nodes in pgrouting table
-	psql -d batch_network -U snow -a -f helper_04_knn_match.sql 
+	psql -d batch_network -U snow -a -f helper_04_knn_match.sql
 
 	# Create cost matrix and write to table
 	state="$(basename "$x" | cut -c 1-2)"
