@@ -10,6 +10,18 @@ if [ ! -f "$file" ]; then
     wget https://download.geofabrik.de/north-america-latest.osm.pbf
 fi
 
+# Prompt asking whether or not to clear the previous output
+while true; do
+    read -p "Do you want to clear the previous cost matrix table? " yn
+    case $yn in
+        [Yy]* ) psql -d batch_network \
+		-U snow \
+		-f helper_04_create_table.sql; break;;
+        [Nn]* ) break;;
+	* ) echo "Please answer yes or no.";;
+    esac
+done
+
 # Prompt asking whether or not to build a new tag extract, takes awhile
 if [ -f "tag_extract.pbf" ]; then
     while true; do
@@ -37,7 +49,7 @@ fi
 # 4. Performs KNN match and updates the tracts table
 # 5. Creates and writes the cost matrix to a separate table
 
-for x in $(find ./counties -name "*.geojson" -type f); do
+for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	echo "Now processing "$x""
 
 	osmium extract -p "$x" tag_extract.pbf \
@@ -75,7 +87,8 @@ for x in $(find ./counties -name "*.geojson" -type f); do
 	psql -d batch_network -U snow -a -f helper_04_cost_matrix.sql.tmp
 	rm helper_04_cost_matrix.sql.tmp
 
-	read -p "Press Enter to continue" </dev/tty
+	# Keep for testing purposes
+	#read -p "Press Enter to continue" </dev/tty
 done
 
 rm temp.osm

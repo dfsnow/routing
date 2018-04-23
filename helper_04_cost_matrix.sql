@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS times;
-CREATE TABLE times AS
+INSERT INTO times (origin, destination, agg_cost)
 SELECT origins.geoid origin, destinations.geoid destination, agg_cost FROM pgr_dijkstraCost('
     WITH w AS (
       SELECT ST_Buffer(ST_Envelope(ST_Union(centroid)), 0.025) u 
