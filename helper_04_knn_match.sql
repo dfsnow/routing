@@ -1,5 +1,4 @@
 ALTER TABLE tracts ADD COLUMN IF NOT EXISTS osm_nn BIGINT DEFAULT NULL;
-UPDATE tracts SET osm_nn = NULL;
 
 CREATE OR REPLACE FUNCTION DoKnnMatch(init_tol float8, step_tol float8, max_tol float8)
 RETURNS float8 AS $$
