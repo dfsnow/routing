@@ -1,5 +1,5 @@
 ALTER TABLE tracts ADD COLUMN IF NOT EXISTS osm_nn BIGINT DEFAULT NULL;
-UPDATE tracts SET osm_nn = NULL WHERE state = $state AND county = $county
+UPDATE tracts SET osm_nn = NULL WHERE state = $state AND county = $county;
 
 CREATE OR REPLACE FUNCTION DoKnnMatch(init_tol float8, step_tol float8, max_tol float8)
 RETURNS float8 AS $$

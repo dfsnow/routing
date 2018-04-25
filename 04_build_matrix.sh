@@ -79,7 +79,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	# KNN matching for all nodes in pgrouting table
 	cat helper_04_knn_match.sql \
 		| sed "s/\$state/$state/g" \
-		| sed "s/\$state/$state/g" \
+		| sed "s/\$county/$county/g" \
 		> "helper_04_knn_match.sql.tmp"
 
 	psql -d batch_network -U snow -a -f helper_04_knn_match.sql.tmp

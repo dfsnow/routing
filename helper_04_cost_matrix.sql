@@ -37,8 +37,3 @@ JOIN tracts origins      ON start_vid = origins.osm_nn
 JOIN tracts destinations ON end_vid   = destinations.osm_nn
 ORDER BY origin, destination
 ;
-
-UPDATE tracts SET osm_nn = (
-  SELECT osm_id FROM ways_vertices_pgr w
-  WHERE osm_nn = w.id)
-WHERE state = $state AND county = $county; 
