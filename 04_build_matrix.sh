@@ -75,7 +75,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	# KNN matching for all nodes in pgrouting table
 	psql -d batch_network -U snow -a -f helper_04_knn_match.sql
 
-	# Create cost matrix and write to table
+	 Create cost matrix and write to table
 	state="$(basename "$x" | cut -c 1-2)"
 	county="$(basename "$x" | cut -c 3-5)"
 

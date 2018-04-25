@@ -12,10 +12,12 @@ UPDATE ways_vertices_pgr a
 
 DELETE FROM ways_vertices_pgr 
   WHERE component != (
-    SELECT DISTINCT ON (component) component
-    FROM ways_vertices_pgr
-    ORDER BY component
-    LIMIT 1);
+    SELECT component FROM (
+      SELECT DISTINCT ON (component) component, COUNT(*)
+      FROM ways_vertices_pgr
+      GROUP BY component
+      ORDER BY component, COUNT) AS m
+    ORDER BY COUNT DESC LIMIT 1);
 
 DELETE FROM ways a
   WHERE NOT EXISTS (
