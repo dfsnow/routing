@@ -1,4 +1,5 @@
-INSERT INTO times (origin, destination, agg_cost)
+DROP TABLE IF EXISTS times;
+CREATE TABLE times AS
 SELECT origins.geoid origin, destinations.geoid destination, agg_cost FROM pgr_dijkstraCost('
     WITH w AS (
       SELECT ST_Buffer(ST_Envelope(ST_Union(centroid)), 0.025) u 
@@ -17,14 +18,14 @@ SELECT origins.geoid origin, destinations.geoid destination, agg_cost FROM pgr_d
   (SELECT array_agg(osm_nn) A 
    FROM tracts
    WHERE osm_nn IS NOT NULL 
-   AND state = 55 AND county = 083),
+   AND state = 17 AND county = 031),
   (SELECT array_agg(osm_nn) 
    FROM tracts
    WHERE osm_nn IS NOT NULL
    AND ST_Contains(
 	(SELECT geom_buffer
 	 FROM counties 
-	 WHERE state = 55 AND county = 083),
+	 WHERE state = 17 AND county = 031),
 	centroid)
   ),
   FALSE
@@ -33,9 +34,3 @@ JOIN tracts origins      ON start_vid = origins.osm_nn
 JOIN tracts destinations ON end_vid   = destinations.osm_nn
 ORDER BY origin, destination
 ;
-
-UPDATE tracts SET osm_nn = (
-  SELECT osm_id
-  FROM ways_vertices_pgr
-  WHERE id = osm_nn)
-  WHERE state = 55 AND county = 083;

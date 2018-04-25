@@ -72,27 +72,20 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	# Deleting isolated ways and nodes
 	psql -d batch_network -U snow -a -f helper_04_connected_components.sql
 
-	# Creating state and county env variables
+	# KNN matching for all nodes in pgrouting table
+	psql -d batch_network -U snow -a -f helper_04_knn_match.sql
+
+	# Create cost matrix and write to table
 	state="$(basename "$x" | cut -c 1-2)"
 	county="$(basename "$x" | cut -c 3-5)"
 
-	# KNN matching for all nodes in pgrouting table
-	cat helper_04_knn_match.sql \
-		| sed "s/\$state/$state/g" \
-		| sed "s/\$county/$county/g" \
-		> "helper_04_knn_match.sql.tmp"
-
-	psql -d batch_network -U snow -a -f helper_04_knn_match.sql.tmp
-	rm helper_04_knn_match.sql.tmp
-
-	# Creating the cost matrix and writing to times table
 	cat helper_04_cost_matrix.sql \
 		| sed "s/\$state/$state/g" \
 	        | sed "s/\$county/$county/g" \
 		> "helper_04_cost_matrix.sql.tmp"
 
 	psql -d batch_network -U snow -a -f helper_04_cost_matrix.sql.tmp
-	#rm helper_04_cost_matrix.sql.tmp
+	rm helper_04_cost_matrix.sql.tmp
 
 	# Keep for testing purposes
 	#read -p "Press Enter to continue" </dev/tty
