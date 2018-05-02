@@ -9,3 +9,4 @@ qgis_query.sql
 *.pbf
 *.csv
 *.tmp
+helper_05_notify.py

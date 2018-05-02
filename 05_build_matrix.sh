@@ -92,4 +92,9 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	#read -p "Press Enter to continue" </dev/tty
 done
 
+# Optional notification script for when batch is finished
+if [ -f "helper_05_notify.py" ]; then
+	python3 helper_05_notify.py
+fi
+
 rm temp.osm
