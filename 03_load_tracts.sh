@@ -63,9 +63,6 @@ psql -d batch_network -U snow << EOD
   SELECT AddGeometryColumn('public','tracts','centroid','4326','POINT',2);
   UPDATE tracts SET centroid = ST_Centroid(geom);
 
-  ALTER TABLE tracts ADD COLUMN area float;
-  UPDATE tracts SET area = ST_Area(geom);
-
   CREATE INDEX ON "public"."tracts" USING GIST ("geom");
 
   ANALYZE "public"."tracts";
