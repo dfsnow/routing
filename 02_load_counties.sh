@@ -90,6 +90,7 @@ psql -d batch_network -U snow << EOD
   ALTER TABLE counties ADD PRIMARY KEY (geoid);
 
   CREATE INDEX ON "public"."counties" USING GIST ("geom");
+  CREATE INDEX ON "public"."counties" USING GIST ("geom_buffer");
   ANALYZE "public"."counties";
 
 EOD

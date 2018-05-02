@@ -6,4 +6,4 @@ CREATE TABLE times (
     agg_cost     float8
 );
 
-ANALYZE times;
+VACUUM(FULL, VERBOSE, ANALYZE) times;

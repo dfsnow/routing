@@ -10,3 +10,9 @@ FROM (
   GROUP BY tract_id) c
 WHERE a.geoid = c.tract_id
 AND c.centroid IS NOT NULL;
+
+CREATE INDEX ON "public"."tracts" USING GIST ("centroid");
+
+VACUUM (FULL, VERBOSE, ANALYZE) counties;
+VACUUM (FULL, VERBOSE, ANALYZE) tracts;
+VACUUM (FULL, VERBOSE, ANALYZE) blocks;

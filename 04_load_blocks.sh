@@ -81,8 +81,6 @@ psql -d batch_network -U snow << EOD
 
   CREATE INDEX ON "public"."blocks" USING GIST ("centroid");
 
-  ANALYZE "public"."blocks";
-
 EOD
 
 cd ../
