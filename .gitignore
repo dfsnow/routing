@@ -1,0 +1,11 @@
+temp
+blocks
+counties
+tracts
+times
+qgis_query.sql
+*.osm
+*.osm.pbf
+*.pbf
+*.csv
+*.tmp
