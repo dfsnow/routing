@@ -66,7 +66,7 @@ FROM pgr_dijkstra('
   AND state = $state AND county = $county AND tract = $tract), (
   SELECT array_agg(osm_nn) 
   FROM tracts t
-  WHERE osm_nn IS NOT NULL
+  WHERE (osm_nn IS NOT NULL
   AND NOT EXISTS (
     SELECT * FROM paths p
     WHERE p.destination = t.geoid)
@@ -74,7 +74,17 @@ FROM pgr_dijkstra('
     SELECT geom_buffer
     FROM counties
     WHERE state = $state AND county = $county),
-  centroid)
+  centroid))
+  OR (osm_nn IS NOT NULL
+  AND t.geoid IN (
+    SELECT m.destination 
+    FROM (
+      SELECT DISTINCT ON (destination) destination, agg_cost
+      FROM paths 
+      ORDER BY destination, agg_cost DESC) m
+    JOIN times ti ON (m.destination = ti.destination)
+    WHERE m.agg_cost < ti.agg_cost
+    AND ti.origin = $state$county$tract)
   ),
   TRUE
 ) a

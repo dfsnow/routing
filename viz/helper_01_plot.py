@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import math
 import matplotlib
 matplotlib.use('Agg')
 
@@ -13,16 +14,17 @@ from multiprocessing import Pool, cpu_count
 # Setup variables
 pw = pd.read_csv('../secrets.csv')['password'][0]
 
-state = 17
-county = 31
-tract = 330100
+state = 18
+county = 97
+tract = 353300
+
+mov_length = 60
+framerate = 24
 
 figsize = (7, 7)
 dpi = 200
-xlim = [-88.382263, -87.390747]
-ylim = [41.448903, 42.128784]
-vmin = 10
-vmax = 60
+xlim = [-87, -85]
+ylim = [39.1, 40.45]
 
 # PostGIS connection
 connection = pg.connect("""
@@ -63,7 +65,7 @@ tracts_gdf = gpd.GeoDataFrame.from_postgis(
     crs = from_epsg(4326))
 
 # Plot settings, turning off legends, padding. Creating plot bounding box
-fig, ax = plt.subplots(1, 1, figsize = figzise))
+fig, ax = plt.subplots(1, 1, figsize = figsize)
 ax2 = fig.add_axes([0,0,1,1])
 ax2.patch.set_alpha(0)
 ax2.set_aspect('equal')
@@ -90,22 +92,23 @@ all_roads_gdf.plot(
     figsize = figsize)
 
 # Colorbar creation and axes
+vmin = round(min(paths_gdf['agg_cost']), -1)
+vmax = round(max(paths_gdf['agg_cost']), -1)
 cax = fig.add_axes([0.92, 0.6, 0.02, 0.2])
 norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
 cb = matplotlib.colorbar.ColorbarBase(
         cax, cmap="BuPu_r", norm=norm)
-#cb.set_label("Minutes From Origin", labelpad=-38, size=9)
 cb.ax.tick_params(labelsize=8) 
 
 # Largest sequences and destination of each path
-paths_ends = paths_gdf.groupby('destination')['path_seq'].max().reset_index()
-paths_ends.columns = ['destination', 'end_seq']
+paths_ends = paths_gdf.groupby('destination')['agg_cost'].max().reset_index()
+paths_ends.columns = ['destination', 'end_cost']
 paths_dict = {}
 
 # Creating and saving each subplot of paths, tracts, and base roads
-
 def create_frames(i):
-    paths_dict[i] = paths_ends[paths_ends['end_seq'] <= i]['destination'].tolist()
+    paths_dict[i] = paths_ends[
+        paths_ends['end_cost'] <= (i / 60)]['destination'].tolist()
     tracts_ends = tracts_gdf[tracts_gdf['destination'].isin(
         paths_dict[i])][['agg_cost', 'geoid', 'geom']]
 
@@ -128,23 +131,28 @@ def create_frames(i):
             vmin=vmin,
             vmax=vmax,
             legend=False,
-            figsize = figsize)
+            figsize=figsize)
 
-    paths_gdf[paths_gdf['path_seq'] <= i].plot(
+    paths_gdf[paths_gdf['agg_cost'] <= (i / 60)].plot(
         ax=ax,
         color='midnightblue',
         alpha=0.9,
         linewidth=0.3,
-        figsize = figsize)
+        figsize=figsize)
 
     fig.savefig(
-            'seq-{}.png'.format(str(i).zfill(4)),
+            'seq-{}.png'.format(str(i).zfill(5)),
             bbox_inches='tight',
             pad_inches=0,
             dpi=dpi)
     ax.clear()
 
+# The range by which to create frames, in seconds, adjusted for framerate
+rmin = int(min(paths_gdf['agg_cost'])) * 60
+rmax = (int(max(paths_gdf['agg_cost'])) + 1) * 60
+rstep = int(rmax / (mov_length * framerate))
+
 pool = Pool(cpu_count())
-pool.map(create_frames, range(1, max(paths_ends['end_seq']) + 1))
+pool.map(create_frames, range(rmin, rmax, rstep))
 
 connection.close()

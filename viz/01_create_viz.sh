@@ -1,8 +1,8 @@
 #!/bin/bash
 
-state='17'
-county='031'
-tract='330100'
+state='18'
+county='097'
+tract='353300'
 
 framerate='24'
 
@@ -30,9 +30,9 @@ psql -d batch_network -U snow -f helper_01_query.sql.tmp
 
 python3 helper_01_plot.py
 
-ffmpeg -framerate "$framerate" -i seq-%04d.png -c:v libx264 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$tract".mp4
+ffmpeg -framerate "$framerate" -i seq-%05d.png -c:v libx264 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$tract".mp4
 
-#ffmpeg -framerate "$framerate" - seq-%04d.png "$tract".webm
+#ffmpeg -framerate "$framerate" - seq-%05d.png "$tract".webm
 #ffmpeg -i "$tract".mp4 "$tract".webm
 
 rm helper_01_query.sql.tmp
