@@ -30,7 +30,7 @@ psql -d batch_network -U snow -f helper_01_query.sql.tmp
 
 python3 helper_01_plot.py
 
-ffmpeg -framerate "$framerate" -i seq-%05d.png -c:v libx264 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$tract".mp4
+ffmpeg -framerate "$framerate" -pattern_type glob -i '*.png' -c:v libx264 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$tract".mp4
 
 #ffmpeg -framerate "$framerate" - seq-%05d.png "$tract".webm
 #ffmpeg -i "$tract".mp4 "$tract".webm
