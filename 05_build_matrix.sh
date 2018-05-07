@@ -5,6 +5,8 @@ file="north-america-latest.osm.pbf"
 tags="motorway,trunk,primary,secondary,tertiary,unclassified,residential,living_street,\
      service,motorway_link,trunk_link,primary_link,secondary_link,tertiary_link"
 
+pw="$(awk 'NR == 2 { print }' secrets.csv | cut -d ',' -f2)"
+
 # Downloads the latest North America extract if it doesn't exist
 if [ ! -f "$file" ]; then
     wget https://download.geofabrik.de/north-america-latest.osm.pbf
@@ -64,7 +66,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 		-c /usr/local/share/osm2pgrouting/mapconfig.xml \
 		--f temp.osm \
 		--clean \
-		--password Stonefish21
+		--password "$pw"
 
 	# Write default maxspeeds. Must be done every loop
 	psql -d batch_network -U snow -a -f helper_05_configuration.sql

@@ -10,3 +10,4 @@ qgis_query.sql
 *.csv
 *.tmp
 helper_05_notify.py
+secrets.csv
