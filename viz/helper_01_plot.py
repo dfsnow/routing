@@ -92,8 +92,10 @@ all_roads_gdf.plot(
     figsize = figsize)
 
 # Colorbar creation and axes
-vmin = round(min(paths_gdf['agg_cost']), -1)
-vmax = round(max(paths_gdf['agg_cost']), -1)
+amin = min(paths_gdf['agg_cost'])
+amax = max(paths_gdf['agg_cost'])
+vmin = round(amin, -1)
+vmax = round(amax, -1) - 30
 cax = fig.add_axes([0.92, 0.6, 0.02, 0.2])
 norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
 cb = matplotlib.colorbar.ColorbarBase(
@@ -140,16 +142,23 @@ def create_frames(i):
         linewidth=0.3,
         figsize=figsize)
 
+    ax.text(0.98, 0.59,
+            '{} min.'.format(int(i / 60)),
+            size=9,
+            ha='right',
+            transform=ax.transAxes)
+
     fig.savefig(
             'seq-{}.png'.format(str(i).zfill(5)),
             bbox_inches='tight',
             pad_inches=0,
             dpi=dpi)
+
     ax.clear()
 
 # The range by which to create frames, in seconds, adjusted for framerate
-rmin = int(min(paths_gdf['agg_cost'])) * 60
-rmax = (int(max(paths_gdf['agg_cost'])) + 1) * 60
+rmin = int(amin) * 60
+rmax = (int(amax) + 1) * 60
 rstep = int(rmax / (mov_length * framerate))
 
 pool = Pool(cpu_count())

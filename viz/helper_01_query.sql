@@ -41,7 +41,8 @@ ORDER BY a.edge
 ;
 
 INSERT INTO paths (origin, destination, agg_cost, path_seq, the_geom)
-SELECT origins.geoid origin, destinations.geoid destination, a.agg_cost, a.path_seq, b.the_geom
+SELECT 
+origins.geoid origin, destinations.geoid destination, a.agg_cost, a.path_seq, b.the_geom
 FROM pgr_dijkstra('
   WITH w AS (
     SELECT ST_Buffer(ST_Envelope(ST_Union(centroid)), 0.025) u 
@@ -84,7 +85,7 @@ FROM pgr_dijkstra('
       ORDER BY destination, agg_cost DESC) m
     JOIN times ti ON (m.destination = ti.destination)
     WHERE m.agg_cost < ti.agg_cost
-    AND ti.origin = $state$county$tract)
+    AND ti.origin = $state$county$tract))
   ),
   TRUE
 ) a
