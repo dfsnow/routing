@@ -9,7 +9,7 @@ qgis_query.sql
 *.pbf
 *.csv
 *.tmp
-*.png
+./*.png
 *.mp4
 helper_05_notify.py
 secrets.csv
