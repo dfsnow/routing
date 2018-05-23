@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import math
+import os
 import matplotlib
 matplotlib.use('Agg')
 
@@ -14,17 +14,18 @@ from multiprocessing import Pool, cpu_count
 # Setup variables
 pw = pd.read_csv('../secrets.csv')['password'][0]
 
-state = 18
-county = 97
-tract = 353300
+state = int(os.environ['state'])
+county = int(os.environ['county'])
+tract = int(os.environ['tract'])
 
-mov_length = 60
-framerate = 24
+framerate = int(os.environ['framerate'])
+mov_length = int(os.environ['mov_length'])
 
 figsize = (7, 7)
 dpi = 200
-xlim = [-87, -85]
-ylim = [39.1, 40.45]
+xlim = [-88.527832, -87.305603]
+ylim = [41.294317, 42.149151]
+
 
 # PostGIS connection
 connection = pg.connect("""
@@ -58,6 +59,7 @@ LEFT JOIN tracts tr
 ON t.destination = tr.geoid
 WHERE t.origin = {}
 """.format(str(state) + str(county).zfill(3) + str(tract).zfill(6))
+
 tracts_gdf = gpd.GeoDataFrame.from_postgis(
     tracts_query,
     connection,
@@ -91,18 +93,20 @@ all_roads_gdf.plot(
     linewidth=0.1,
     figsize = figsize)
 
-# Colorbar creation and axes
-amin = min(paths_gdf['agg_cost'])
+# Setting the max and min interval for frames and colorbar
+amin = min(paths_gdf['agg_cost']) # for frames
 amax = max(paths_gdf['agg_cost'])
-vmin = round(amin, -1)
-vmax = round(amax, -1) - 30
+vmin = round(amin, -1) + 10 # for colorbar
+vmax = round(amax, -1) - 80
+
+# Colorbar and axes creation 
 cax = fig.add_axes([0.92, 0.6, 0.02, 0.2])
 norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
 cb = matplotlib.colorbar.ColorbarBase(
         cax, cmap="BuPu_r", norm=norm)
 cb.ax.tick_params(labelsize=8) 
 
-# Largest sequences and destination of each path
+# Get max agg_cost and destination of each path
 paths_ends = paths_gdf.groupby('destination')['agg_cost'].max().reset_index()
 paths_ends.columns = ['destination', 'end_cost']
 paths_dict = {}
@@ -156,11 +160,12 @@ def create_frames(i):
 
     ax.clear()
 
-# The range by which to create frames, in seconds, adjusted for framerate
+# The range from which to create frames, in seconds, adjusted for framerate
 rmin = int(amin) * 60
 rmax = (int(amax) + 1) * 60
 rstep = int(rmax / (mov_length * framerate))
 
+# Multiprocessing function loop over created range
 pool = Pool(cpu_count())
 pool.map(create_frames, range(rmin, rmax, rstep))
 

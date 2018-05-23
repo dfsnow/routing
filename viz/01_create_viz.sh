@@ -1,10 +1,11 @@
 #!/bin/bash
 
-state='18'
-county='097'
-tract='353300'
+export state='17'
+export county='031'
+export tract='330100'
 
-framerate='24'
+export framerate='30' # automatically changes plot interval
+export mov_length='60' # total, in seconds
 
 psql -d batch_network -U snow << EOD
 DROP TABLE IF EXISTS paths;
@@ -30,7 +31,8 @@ psql -d batch_network -U snow -f helper_01_query.sql.tmp
 
 python3 helper_01_plot.py
 
-ffmpeg -framerate "$framerate" -pattern_type glob -i '*.png' -c:v libx264 -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$tract".mp4
+ffmpeg -framerate "$framerate" -pattern_type glob -i '*.png' -c:v libx264 \
+  -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$tract".mp4
 
 #ffmpeg -framerate "$framerate" - seq-%05d.png "$tract".webm
 #ffmpeg -i "$tract".mp4 "$tract".webm
