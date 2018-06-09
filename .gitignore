@@ -3,6 +3,7 @@ counties
 tracts
 blocks
 times
+*.jar
 *.osm
 *.osm.pbf
 *.pbf

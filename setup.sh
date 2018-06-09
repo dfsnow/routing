@@ -64,8 +64,8 @@ pipenv install
 sudo apt install -y default-jre
 
 # Download standalone jars for OTP and Jython
-mkdir jars
-cd jars
+mkdir otp
+cd otp
 wget https://repo1.maven.org/maven2/org/opentripplanner/otp/1.2.0/otp-1.2.0-shaded.jar
 wget http://search.maven.org/remotecontent?filepath=org/python/jython-standalone/2.7.0/jython-standalone-2.7.0.jar \
     -O jython-standalone-2.7.0.jar
