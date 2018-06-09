@@ -1,9 +1,8 @@
 temp
-blocks
 counties
 tracts
+blocks
 times
-qgis_query.sql
 *.osm
 *.osm.pbf
 *.pbf
@@ -11,5 +10,4 @@ qgis_query.sql
 *.tmp
 ./*.png
 *.mp4
-helper_05_notify.py
-secrets.csv
+config.json

@@ -1,18 +1,20 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 import geopandas as gpd
 import pandas as pd
 import urllib.request
 import requests
 import zipfile
+import json
 import sys
 import os
 
-# Census API key
-api_key = "5715ad9a4771612cf866aa434f979c3b00ff6eed"
+# Populating setup variables from the config file
+with open("config.json") as filename:
+     jsondata = json.load(filename)
 
-# Setup variables
-year = 2015
+api_key = jsondata["geometry_settings"]["census_api_key"]
+year = jsondata["geometry_settings"]["tiger_geometry_year"]
 states = pd.read_csv('states.csv')
 rel_path = "tracts/"
 

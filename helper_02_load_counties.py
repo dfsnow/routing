@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 import geopandas as gpd
 import pandas as pd
@@ -7,12 +7,16 @@ import zipfile
 import os
 import fiona
 import requests
+import json
 from fiona.crs import from_epsg
 from shapely.geometry import Polygon, mapping
 
 # Various settings and parameters for the script
-year = 2015
-buffer = 1e5 # meters
+with open("config.json") as filename:
+    jsondata = json.load(filename)
+
+year = jsondata["geometry_settings"]["tiger_geometry_year"]
+buffer = jsondata["geometry_settings"]["county_buffer_meters"]
 rel_path = "counties/"
 schema={
   'geometry': 'Polygon',

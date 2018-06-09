@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import json
 import matplotlib
 matplotlib.use('Agg')
 
@@ -11,29 +12,33 @@ import geopandas as gpd
 from fiona.crs import from_epsg
 from multiprocessing import Pool, cpu_count
 
-# Setup variables
-pw = pd.read_csv('../secrets.csv')['password'][0]
 
-state = int(os.environ['state'])
-county = int(os.environ['county'])
-tract = int(os.environ['tract'])
+# Populating setup variables from the config file
+with open("../config.json") as filename:
+    jsondata = json.load(filename)
 
-framerate = int(os.environ['framerate'])
-mov_length = int(os.environ['mov_length'])
+db = jsondata["db_settings"]
+viz = jsondata["visualization_settings"]
 
-figsize = (7, 7)
-dpi = 200
-xlim = [-88.527832, -87.305603]
-ylim = [41.294317, 42.149151]
+framerate = viz["mov_framerate"]
+mov_length = viz["mov_length"]
+figsize = tuple(viz["mov_size"])
+dpi = viz["mov_dpi"]
 
+xlim = viz["mov_xlim"]
+ylim = viz["mov_ylim"]
 
 # PostGIS connection
 connection = pg.connect("""
-    dbname='batch_network'
-    user='snow'
-    host='lab.dfsnow.me'
-    password={}
-    """.format(pw))
+    dbname={0}
+    user={1}
+    host={2}
+    password={3}
+    """.format(
+        db["db_name"],
+        db["db_user"],
+        db["db_host"],
+        db["db_password"]))
 
 # Query to get all roads in the area
 all_roads_query="SELECT the_geom FROM ways"
@@ -58,7 +63,7 @@ FROM times t
 LEFT JOIN tracts tr
 ON t.destination = tr.geoid
 WHERE t.origin = {}
-""".format(str(state) + str(county).zfill(3) + str(tract).zfill(6))
+""".format(viz["origin_geoid"])
 
 tracts_gdf = gpd.GeoDataFrame.from_postgis(
     tracts_query,
@@ -99,12 +104,12 @@ amax = max(paths_gdf['agg_cost'])
 vmin = round(amin, -1) + 10 # for colorbar
 vmax = round(amax, -1) - 80
 
-# Colorbar and axes creation 
+# Colorbar and axes creation
 cax = fig.add_axes([0.92, 0.6, 0.02, 0.2])
 norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
 cb = matplotlib.colorbar.ColorbarBase(
         cax, cmap="BuPu_r", norm=norm)
-cb.ax.tick_params(labelsize=8) 
+cb.ax.tick_params(labelsize=8)
 
 # Get max agg_cost and destination of each path
 paths_ends = paths_gdf.groupby('destination')['agg_cost'].max().reset_index()
