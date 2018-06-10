@@ -62,7 +62,12 @@ sudo apt install -y python$python_major python3-pip gdal-bin libgdal-dev \
 sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python$python_major 1
 
 # Install pipenv and the necessary modules
-pip3 install pipenv
+pip3 install --upgrade pip==9.0.3
+pip3 install --user pipenv
+
+PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
+echo "PATH="\$PATH:$PYTHON_BIN_PATH"" >> ~/.profile
+source ~/.profile
 pipenv install
 
 # Install Java Runtime Environment for OTP
