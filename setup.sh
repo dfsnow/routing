@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install some necessary dependencies
-sudo apt-get install wget ca-certificates
+sudo apt install -y wget git ca-certificates
 
 # Get origin directory of the script
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -30,7 +30,7 @@ sudo apt install -y postgresql-$postgresql_major \
 sudo apt install -y osmctools
 
 # Install osmium and osm2pgrouting dependencies
-sudo apt install -y libosmium2-dev libprotozero-dev libutfcpp-dev cmake libpqxx-dev\
+sudo apt install -y libosmium2-dev libprotozero-dev libutfcpp-dev cmake cmake-curses-gui libpqxx-dev\
     rapidjson-dev libboost-program-options-dev libboost-dev libbz2-dev zlib1g-dev libexpat1-dev
 
 # Install osmium-tool from source
@@ -42,28 +42,30 @@ git clone https://github.com/osmcode/osmium-tool
 
 cd osmium-tool
 mkdir build
-cd build && cmake .. && ccmake . && make
+sudo sh -c 'cd build && cmake .. && make && make install'
 cd ../..
 
 # Install osm2pgrouting from source
 git clone https://github.com/pgRouting/osm2pgrouting.git
-cd osm2pgrouting && \
+sudo sh -c 'cd osm2pgrouting && \
     cmake -H. -Bbuild && \
-    cd build/ && make && make install
+    cd build/ && make && make install'
 
 cd $script_dir
 rm -rf work
 
-# Install pipenv and the necessary modules
-sudo add-apt-repository ppa:deadsnakes/ppa
+# Install python3.7 and dependencies
+sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt-get update
-sudo apt install -y python3.7 python3-pip gdal-bin libgdal-dev python3-numpy python3-gdal
+sudo apt install -y python3.7 python3-pip gdal-bin libgdal-dev python3-numpy python3-gdal python3.7-dev
 sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
 
+# Install pipenv and the necessary modules
 pip install --user pipenv
 pippath="$(python3 -m site --user-base)"
 echo PATH="\$PATH:$pippath/bin" >> ~/.profile
+source ~/.profile
 pipenv install
 
 # Install Java Runtime Environment for OTP
@@ -76,4 +78,15 @@ wget https://repo1.maven.org/maven2/org/opentripplanner/otp/1.2.0/otp-1.2.0-shad
 wget http://search.maven.org/remotecontent?filepath=org/python/jython-standalone/2.7.0/jython-standalone-2.7.0.jar \
     -O jython-standalone-2.7.0.jar
 cd $script_dir
+
+db_pass="$(jq -r .db_settings.db_password config.json)"
+db_user="$(jq -r .db_settings.db_user config.json)"
+
+sudo -u postgres psql << EOD
+
+    CREATE USER $db_user PASSWORD '$db_pass';
+    GRANT ALL ON SCHEMA public TO $db_user;
+    GRANT ALL ON ALL TABLES IN SCHEMA public TO $db_user;
+
+EOD
 
