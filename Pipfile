@@ -12,6 +12,7 @@ pandas = "*"
 fiona = "*"
 geopandas = "*"
 pyproj = "*"
+requests = "*"
 
 [dev-packages]
 

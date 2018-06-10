@@ -9,10 +9,10 @@ if [ ! -d "tracts" ]; then
 fi
 
 # Download tract files and unzip them
-pipenv run helper_03_load_tracts.py
+pipenv run python helper_03_load_tracts.py
 
 # Prep database for writing
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     -- Shapefile type: Polygon
     -- Postgis type: MULTIPOLYGON[2]
@@ -44,10 +44,10 @@ cd tracts
 for x in $(ls cb_2015_*shp | sed "s/.shp//"); do
   shp2pgsql -I -s 4269:4326 -a -W "latin1" $x public.tracts \
     | grep -v "GIST\|ANALYZE" \
-    | psql -d "$(db_name)" -U "$(db_user)"
+    | psql -d "$db_name" -U "$db_user"
 done
 
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     ALTER TABLE tracts
     DROP COLUMN gid,

@@ -9,10 +9,10 @@ if [ ! -d "blocks" ]; then
 fi
 
 # Download block files and unzip them
-pipenv run helper_04_load_blocks.py
+pipenv run python helper_04_load_blocks.py
 
 # Prep database for writing
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     -- Shapefile type: Polygon
     -- Postgis type: MULTIPOLYGON[2]
@@ -45,10 +45,10 @@ cd blocks
 for x in $(ls tabblock2010_*shp | sed "s/.shp//"); do
   shp2pgsql -I -s 4269:4326 -a -W "latin1" $x public.blocks \
     | grep -v "GIST\|ANALYZE" \
-    | psql -d "$(db_name)" -U "$(db_user)"
+    | psql -d "$db_name" -U "$db_user"
 done
 
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     ALTER TABLE blocks
     DROP COLUMN gid,
@@ -88,4 +88,4 @@ EOD
 cd ..
 
 # Weighting tracts by block centroids
-psql -d "$(db_name)" -U "$(db_user)" -f helper_04_weight_tracts.sql
+psql -d "$db_name" -U "$db_user" -f helper_04_weight_tracts.sql

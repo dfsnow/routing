@@ -32,8 +32,8 @@ if [ "$prompt" = true ]; then
     while true; do
         read -p "Do you want to clear the previous cost matrix table? " yn
         case $yn in
-            [Yy]* ) psql -d "$(db_name)" \
-            -U "$(db_user)" \
+            [Yy]* ) psql -d "$db_name" \
+            -U "$db_user" \
             -f helper_05_create_table.sql; break;;
             [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
@@ -78,18 +78,18 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	# Removing trailing backslash characters from the osm file
 	sed -i 's/\\//g' temp.osm
 
-	osm2pgrouting -U "$(db_user)" \
-		-d "$(db_name)" \
+	osm2pgrouting -U "$db_user" \
+		-d "$db_name" \
 		-c "$osm2pg_mapconfig" \
 		--f temp.osm \
 		--clean \
 		--password "$db_pass"
 
 	# Write default maxspeeds. Must be done every loop
-	psql -d "$(db_name)" -U "$(db_user)" -a -f "$osm_way_config"
+	psql -d "$db_name" -U "$db_user" -a -f "$osm_way_config"
 
 	# Deleting isolated ways and nodes
-	psql -d "$(db_name)" -U "$(db_user)" -a -f helper_05_connected_components.sql
+	psql -d "$db_name" -U "$db_user" -a -f helper_05_connected_components.sql
 
 	# KNN matching for all nodes in pgrouting table
 	cat helper_05_knn_match.sql \
@@ -98,7 +98,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
         | sed "s/\$knn_max/$knn_max/g" \
 		> "helper_05_knn_match.sql.tmp"
 
-	psql -d "$(db_name)" -U "$(db_user)" -a -f helper_05_knn_match.sql.tmp
+	psql -d "$db_name" -U "$db_user" -a -f helper_05_knn_match.sql.tmp
 
 	# Creating env variables for use in matrix script
     geoid="$(basename "$x" | cut -c 1-5)"
@@ -111,7 +111,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	    | sed "s/\$county/$county/g" \
 		> "helper_05_cost_matrix.sql.tmp"
 
-	psql -d "$(db_name)" -U "$(db_user)" -a -f helper_05_cost_matrix.sql.tmp
+	psql -d "$db_name" -U "$db_user" -a -f helper_05_cost_matrix.sql.tmp
 
 	rm *.sql.tmp
 
@@ -122,7 +122,7 @@ done
 
 # Optional notification script for when batch is finished
 if [ "$notify" = true ]; then
-	pipenv run helper_05_notify.py
+	pipenv run python helper_05_notify.py
 fi
 
 rm temp.osm

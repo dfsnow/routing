@@ -11,10 +11,10 @@ fi
 # Download the county file, unzip it, and create buffered county
 # geojsons for use with osmium. Remove old geojson first
 find ./counties -name "*.geojson" -type f -delete
-pipenv run helper_02_load_counties.py
+pipenv run python3 helper_02_load_counties.py
 
 # Prep database for writing
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     -- Shapefile type: Polygon
     -- Postgis type: MULTIPOLYGON[2]
@@ -54,13 +54,13 @@ cd counties
 
 shp2pgsql -I -a -s 4269:4326 -W "latin1" tl_2015_us_county public.counties \
     | grep -v "GIST\|ANALYZE" \
-    | psql -d "$(db_name)" -U "$(db_user)"
+    | psql -d "$db_name" -U "$db_user"
 
 shp2pgsql -c -s 4326:4326 -g geom_buffer -W \
     "latin1" tl_2015_us_county_buffered public.counties_temp \
-    | psql -d "$(db_name)" -U "$(db_user)"
+    | psql -d "$db_name" -U "$db_user"
 
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     UPDATE counties c
     SET geom_buffer = ct.geom_buffer
@@ -72,7 +72,7 @@ psql -d "$(db_name)" -U "$(db_user)" << EOD
 EOD
 
 # Cleanup after writing, dropping unneeded columns
-psql -d "$(db_name)" -U "$(db_user)" << EOD
+psql -d "$db_name" -U "$db_user" << EOD
 
     ALTER TABLE counties
     DROP COLUMN gid,
