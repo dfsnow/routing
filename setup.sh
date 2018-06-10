@@ -12,8 +12,7 @@ tmp="$(tempfile)"
 jq -r ".base_dir = \"$script_dir\"" config.json > "$tmp" && mv "$tmp" config.json | unset tmp
 
 # Get software version numbers
-postgresql_major="$(jq .package_versions.postgresql_major config.json)"
-postgis_major="$(jq .package_versions.postgis_major config.json)"
+eval "$(jq -r ".package_versions | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
 
 # Install PostgreSQL, pgrouting, and PostGIS
 sudo sh -c 'echo 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' \
@@ -52,21 +51,18 @@ sudo sh -c 'cd osm2pgrouting && \
     cd build/ && make && make install'
 
 cd $script_dir
-rm -rf work
+sudo rm -rf work
+sudo rm -rf osm2pgrouting
 
 # Install python3.7 and dependencies
 sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt-get update
-sudo apt install -y python3.7 python3-pip gdal-bin libgdal-dev \
-    python3-numpy python3-gdal python3.7-dev libfreetype6-dev
-sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
+sudo apt install -y python$python_major python3-pip gdal-bin libgdal-dev \
+    python3-numpy python3-gdal python$python_major-dev libfreetype6-dev
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python$python_major 1
 
 # Install pipenv and the necessary modules
-pip install --user pipenv
-pippath="$(python3 -m site --user-base)"
-echo PATH="\$PATH:$pippath/bin" >> ~/.profile
-source ~/.profile
+pip3 install pipenv
 pipenv install
 
 # Install Java Runtime Environment for OTP
@@ -75,20 +71,7 @@ sudo apt install -y default-jre
 # Download standalone jars for OTP and Jython
 mkdir otp
 cd otp
-wget https://repo1.maven.org/maven2/org/opentripplanner/otp/1.2.0/otp-1.2.0-shaded.jar
-wget http://search.maven.org/remotecontent?filepath=org/python/jython-standalone/2.7.0/jython-standalone-2.7.0.jar \
+wget https://repo1.maven.org/maven2/org/opentripplanner/otp/$otp_major/otp-$otp_major-shaded.jar
+wget "http://search.maven.org/remotecontent?filepath=org/python/jython-standalone/$jython_major/jython-standalone-$jython_major.jar" \
     -O jython-standalone-2.7.0.jar
 cd $script_dir
-
-db_pass="$(jq -r .db_settings.db_password config.json)"
-db_user="$(jq -r .db_settings.db_user config.json)"
-
-sudo -u postgres psql << EOD
-
-    CREATE USER $db_user PASSWORD '$db_pass';
-    GRANT ALL ON SCHEMA public TO $db_user;
-    GRANT ALL ON ALL TABLES IN SCHEMA public TO $db_user;
-    ALTER USER $db_user CREATEDB;
-
-EOD
-
