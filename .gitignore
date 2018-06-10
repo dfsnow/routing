@@ -9,6 +9,7 @@ times
 *.osm.pbf
 *.pbf
 *.csv
+!states.csv
 *.tmp
 ./*.png
 *.mp4
