@@ -11,6 +11,7 @@ shapely = "*"
 pandas = "*"
 fiona = "*"
 geopandas = "*"
+pyproj = "*"
 
 [dev-packages]
 

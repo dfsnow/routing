@@ -57,7 +57,8 @@ rm -rf work
 # Install python3.7 and dependencies
 sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt-get update
-sudo apt install -y python3.7 python3-pip gdal-bin libgdal-dev python3-numpy python3-gdal python3.7-dev
+sudo apt install -y python3.7 python3-pip gdal-bin libgdal-dev \
+    python3-numpy python3-gdal python3.7-dev libfreetype6-dev
 sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
 
@@ -87,6 +88,7 @@ sudo -u postgres psql << EOD
     CREATE USER $db_user PASSWORD '$db_pass';
     GRANT ALL ON SCHEMA public TO $db_user;
     GRANT ALL ON ALL TABLES IN SCHEMA public TO $db_user;
+    ALTER USER $db_user CREATEDB;
 
 EOD
 
