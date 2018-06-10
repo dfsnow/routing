@@ -55,13 +55,12 @@ psql -d "$db_name" -U "$db_user" << EOD
     DROP COLUMN partflg,
     DROP COLUMN housing10;
 
-    ALTER TABLE blocks
-    RENAME COLUMN statefp10  TO state,
-    RENAME COLUMN countyfp10 TO county,
-    RENAME COLUMN tractce10  TO tract,
-    RENAME COLUMN blockce    TO block,
-    RENAME COLUMN blockid10  TO geoid,
-    RENAME COLUMN pop10      TO block_pop;
+    ALTER TABLE blocks RENAME COLUMN statefp10  TO state;
+    ALTER TABLE blocks RENAME COLUMN countyfp10 TO county;
+    ALTER TABLE blocks RENAME COLUMN tractce10  TO tract;
+    ALTER TABLE blocks RENAME COLUMN blockce    TO block;
+    ALTER TABLE blocks RENAME COLUMN blockid10  TO geoid;
+    ALTER TABLE blocks RENAME COLUMN pop10      TO block_pop;
 
     ALTER TABLE blocks ADD PRIMARY KEY (geoid);
     CREATE INDEX blk_idx ON blocks (state, county, tract, block);

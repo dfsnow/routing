@@ -88,9 +88,8 @@ psql -d "$db_name" -U "$db_user" << EOD
     DROP COLUMN intptlat,
     DROP COLUMN intptlon;
 
-    ALTER TABLE counties
-    RENAME COLUMN statefp  TO state,
-    RENAME COLUMN countyfp TO county;
+    ALTER TABLE counties RENAME COLUMN statefp  TO state;
+    ALTER TABLE counties RENAME COLUMN countyfp TO county;
     ALTER TABLE counties ADD PRIMARY KEY (geoid);
 
     CREATE INDEX ON "public"."counties" USING GIST ("geom");

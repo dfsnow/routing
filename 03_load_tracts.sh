@@ -57,10 +57,9 @@ psql -d "$db_name" -U "$db_user" << EOD
     DROP COLUMN aland,
     DROP COLUMN awater;
 
-    ALTER TABLE tracts
-    RENAME COLUMN statefp  TO state,
-    RENAME COLUMN countyfp TO county,
-    RENAME COLUMN tractce  TO tract;
+    ALTER TABLE tracts RENAME COLUMN statefp  TO state;
+    ALTER TABLE tracts RENAME COLUMN countyfp TO county;
+    ALTER TABLE tracts RENAME COLUMN tractce  TO tract;
     ALTER TABLE tracts ADD PRIMARY KEY (geoid);
 
     SELECT AddGeometryColumn('public','tracts','centroid','4326','POINT',2);
