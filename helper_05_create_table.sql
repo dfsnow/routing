@@ -4,7 +4,7 @@ CREATE TABLE times (
     origin          bigint,
     destination     bigint,
     agg_cost        float8,
-    method          smallint
+    type            smallint
 );
 
 VACUUM(FULL, VERBOSE, ANALYZE) times;

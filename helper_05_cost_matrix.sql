@@ -1,5 +1,5 @@
-INSERT INTO times (origin, destination, agg_cost)
-SELECT origins.geoid origin, destinations.geoid destination, agg_cost
+INSERT INTO times (origin, destination, agg_cost, type)
+SELECT origins.geoid origin, destinations.geoid destination, agg_cost, 1
 FROM pgr_dijkstraCost('
     WITH w AS (
         SELECT ST_Buffer(ST_Envelope(ST_Union(centroid)), 0.025) u 

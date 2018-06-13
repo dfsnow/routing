@@ -79,6 +79,11 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 		--clean \
 		--password "$db_pass"
 
+
+
+    # Insert traffic stuff here
+
+
 	# Write default maxspeeds. Must be done every loop
 	psql -d "$db_name" -U "$db_user" -a -f "$osm_way_config"
 
@@ -99,15 +104,15 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	state="$(basename "$x" | cut -c 1-2)"
 	county="$(basename "$x" | cut -c 3-5)"
 
+    # Run OTP for transit if the necessary files exist in otp/graphs
     if [ -d otp/graphs/"$GEOID" ]; then
 
         # Generate a matrix for OTP to use
-        psql -d "$db_name" -U "$db_user" -c "
-            \COPY (
-                SELECT geoid, ST_Y(centroid) AS Y, ST_X(centroid) AS X
-                FROM tracts
-                WHERE state = "$state" AND county = "$county")
-            TO 'points.csv' DELIMITER ',' CSV HEADER;"
+        psql -d "$db_name" -U "$db_user" -c "\COPY (
+            SELECT geoid, ST_Y(centroid) AS Y, ST_X(centroid) AS X
+            FROM tracts
+            WHERE osm_nn IS NOT NULL
+        ) TO 'points.csv' DELIMITER ',' CSV HEADER;"
         sed -i '1s/.*/\U&/' points.csv
 
         # Symlink the OSM to the necessary folder for OTP
@@ -125,7 +130,8 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
             helper_05_otp.py
 
         psql -d "$db_name" -U "$db_user" -c \
-            "\COPY (times FROM 'matrix.csv' DELIMITER ',' CSV HEADER;"
+            "\COPY times (origin, destination, agg_cost, type)
+              FROM 'matrix.csv' DELIMITER ',' CSV HEADER;"
 
     fi
 
@@ -138,7 +144,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	psql -d "$db_name" -U "$db_user" -a -f helper_05_cost_matrix.sql.tmp
 
     # Remove all unneeded temp files
-	rm *.sql.tmp points.csv matrix.csv "$base_dir"/otp/graphs/"$GEOID"/temp.osm
+	#rm *.sql.tmp points.csv matrix.csv "$base_dir"/otp/graphs/"$GEOID"/temp.osm
 
 	# Keep for testing purposes
 	#read -p "Press Enter to continue" </dev/tty

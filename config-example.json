@@ -1,5 +1,5 @@
 {
-  "base_dir": "Set automatically when setup.sh is run",
+  "base_dir": "/home/snow/routing",
   "prompt_to_overwrite": "true",
   "package_versions": {
     "postgresql_major": 10,
@@ -9,7 +9,7 @@
     "jython_major": "2.7.0"
   },
   "db_settings": {
-    "db_host": "test.me",
+    "db_host": "www.test.me",
     "db_name": "network",
     "db_user": "user",
     "db_password": "password"
@@ -43,10 +43,16 @@
     "knn_step": 0.001,
     "knn_max": 0.5
   },
+  "otp_settings": {
+    "departure_date": "2018-06-15",
+    "departure_time": "12:00:00",
+    "maximum_travel_time": 7200,
+    "transport_modes": ["WALK", "TRANSIT"]
+  },
   "notification_settings": {
     "notify": "true",
     "join_api_key": "api_key",
-    "join_device_name": "Device Name"
+    "join_device_name": "iPhone"
   },
   "visualization_settings": {
     "origin_geoid": "17031330100",

@@ -1,7 +1,10 @@
+ALTER TABLE tracts ADD COLUMN IF NOT EXISTS pop bigint;
+
 UPDATE tracts a
-SET centroid = c.centroid
+SET centroid = c.centroid,
+    pop      = c.pop
 FROM (
-    SELECT tract_id, ST_Transform(
+    SELECT tract_id, avg(tract_pop) AS pop, ST_Transform(
         ST_SetSRID(ST_MakePoint(
             sum(ST_X(ST_Transform(b.centroid,2163))*b.block_weight),
             sum(ST_Y(ST_Transform(b.centroid,2163))*b.block_weight)),
