@@ -1,31 +1,23 @@
 #!/bin/bash
 
 ## Loading all necessary variables from config file
-# Loading db config variables
-db_name="$(jq -r .db_settings.db_name config.json)"
-db_user="$(jq -r .db_settings.db_user config.json)"
-db_pass="$(jq -r .db_settings.db_password config.json)"
+# Loading config variables
+base_dir="$(jq -r .base_dir config.json)"
 prompt="$(jq -r .prompt_to_overwrite config.json)"
-
-# Loading routing config variables
-file="$(jq .routing_settings.osm_filename config.json)"
-tags="$(jq .routing_settings.osm_way_tags | join(",") config.json)"
-osm_way_config="$(jq -r .routing_settings.osm_way_config config.json)"
-osm2pg_mapconfig="$(jq -r .routing_settings.osm2pg_mapconfig config.json)"
-knn_start="$(jq -r .routing_settings.knn_start config.json)"
-knn_step="$(jq -r .routing_settings.knn_step config.json)"
-knn_max="$(jq -r .routing_settings.knn_max config.json)"
-
-# Loading notification settings
+eval "$(jq -r ".package_versions | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
+eval "$(jq -r ".db_settings | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
+eval "$(jq -r ".routing_settings | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
+tags="$(jq -r '.routing_settings.osm_way_tags | join(",")' config.json)"
 notify="$(jq -r .notification_settings.notify config.json)"
 
 
 ## Start of main script
 # Downloads the latest North America extract if it doesn't exist
-if [ ! -f "$file" ]; then
+if [ ! -f "$osm_filename" ]; then
     wget https://download.geofabrik.de/north-america-latest.osm.pbf \
-        -O "$file"
+        -O "$osm_filename"
 fi
+
 
 # Prompt asking whether or not to clear the previous output
 if [ "$prompt" = true ]; then
@@ -42,20 +34,22 @@ if [ "$prompt" = true ]; then
 fi
 
 # Prompt asking whether or not to build a new tag extract, takes awhile
-if [ -f "tag_extract.pbf" ] && [ "$prompt" = true ]; then
-    while true; do
-        read -p "Do you want to make a new tag extract? " yn
-        case $yn in
-            [Yy]* ) osmium tags-filter "$file" \
-		    w/highway="$tags" \
-	            --overwrite \
-		    -o tag_extract.pbf; break;;
-	    [Nn]* ) break;;
-	    * ) echo "Please answer yes or no.";;
-        esac
-    done
+if [ -f "tag_extract.pbf" ]; then
+    if [ "$prompt" = true ]; then
+        while true; do
+            read -p "Do you want to make a new tag extract? " yn
+            case $yn in
+                [Yy]* ) osmium tags-filter "$osm_filename" \
+                w/highway="$tags" \
+                    --overwrite \
+                -o tag_extract.pbf; break;;
+            [Nn]* ) break;;
+            * ) echo "Please answer yes or no.";;
+            esac
+        done
+    fi
 else
-    osmium tags-filter "$file" \
+    osmium tags-filter "$osm_filename" \
 	w/highway="$tags" \
 	--overwrite \
 	-o tag_extract.pbf
@@ -101,9 +95,39 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	psql -d "$db_name" -U "$db_user" -a -f helper_05_knn_match.sql.tmp
 
 	# Creating env variables for use in matrix script
-    geoid="$(basename "$x" | cut -c 1-5)"
+    export GEOID="$(basename "$x" | cut -c 1-5)"
 	state="$(basename "$x" | cut -c 1-2)"
 	county="$(basename "$x" | cut -c 3-5)"
+
+    if [ -d otp/graphs/"$GEOID" ]; then
+
+        # Generate a matrix for OTP to use
+        psql -d "$db_name" -U "$db_user" -c "
+            \COPY (
+                SELECT geoid, ST_Y(centroid) AS Y, ST_X(centroid) AS X
+                FROM tracts
+                WHERE state = "$state" AND county = "$county")
+            TO 'points.csv' DELIMITER ',' CSV HEADER;"
+        sed -i '1s/.*/\U&/' points.csv
+
+        # Symlink the OSM to the necessary folder for OTP
+        ln -s "$base_dir"/temp.osm "$base_dir"/otp/graphs/"$GEOID"
+
+        # Build the OTP graph object
+        java -jar otp/otp-"$otp_major"-shaded.jar \
+            --cache otp/ \
+            --basePath otp/ \
+            --build otp/graphs/"$GEOID"
+
+        # Process OTP graph
+        java -jar otp/jython-standalone-"$jython_major".jar \
+            -Dpython.path=otp/otp-"$otp_major"-shaded.jar \
+            helper_05_otp.py
+
+        psql -d "$db_name" -U "$db_user" -c \
+            "\COPY (times FROM 'matrix.csv' DELIMITER ',' CSV HEADER;"
+
+    fi
 
 	# Creating the final cost matrix and writing to a results table
 	cat helper_05_cost_matrix.sql \
@@ -113,7 +137,8 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 
 	psql -d "$db_name" -U "$db_user" -a -f helper_05_cost_matrix.sql.tmp
 
-	rm *.sql.tmp
+    # Remove all unneeded temp files
+	rm *.sql.tmp points.csv matrix.csv "$base_dir"/otp/graphs/"$GEOID"/temp.osm
 
 	# Keep for testing purposes
 	#read -p "Press Enter to continue" </dev/tty
@@ -125,4 +150,4 @@ if [ "$notify" = true ]; then
 	pipenv run python helper_05_notify.py
 fi
 
-rm temp.osm
+#rm temp.osm

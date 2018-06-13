@@ -3,6 +3,7 @@ counties
 tracts
 blocks
 times
+otp/graphs
 *.swp
 *.jar
 *.osm

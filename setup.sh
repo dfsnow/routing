@@ -71,7 +71,7 @@ source ~/.profile
 pipenv install
 
 # Install Java Runtime Environment for OTP
-sudo apt install -y default-jre
+sudo apt install -y openjdk-8-jre
 
 # Download standalone jars for OTP and Jython
 mkdir otp
