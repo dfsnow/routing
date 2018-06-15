@@ -15,3 +15,4 @@ otp/graphs
 ./*.png
 *.mp4
 config.json
+DockerfileTemp
