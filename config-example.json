@@ -1,5 +1,5 @@
 {
-  "base_dir": "/home/snow/routing",
+  "base_dir": "Set at script run",
   "prompt_to_overwrite": "true",
   "package_versions": {
     "postgresql_major": 10,
@@ -53,6 +53,11 @@
     "notify": "true",
     "join_api_key": "api_key",
     "join_device_name": "iPhone"
+  },
+  "docker_settings": {
+    "aws_default_region": "region",
+    "aws_access_key": "key",
+    "aws_secret_access_key": "secret"
   },
   "visualization_settings": {
     "origin_geoid": "17031330100",
