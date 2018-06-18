@@ -4,6 +4,7 @@ tracts
 blocks
 times
 otp/graphs
+raw
 *.swp
 *.jar
 *.osm

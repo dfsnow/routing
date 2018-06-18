@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Import AWS credentials
-eval "$(jq -r ".docker_settings | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" ~/routing/config.json)"
+eval "$(jq -r ".docker_settings | to_entries | map(\"\(.key)=\(.value |
+    tostring)\")|.[]" ~/routing/config.json)"
 
 # Create temp build file with credentials
 echo $aws_default_region

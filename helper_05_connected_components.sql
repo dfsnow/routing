@@ -1,5 +1,6 @@
 ALTER TABLE ways_vertices_pgr
-ADD COLUMN IF NOT EXISTS component bigint DEFAULT NULL;
+ADD COLUMN IF NOT EXISTS component bigint DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS geoid bigint DEFAULT NULL;
 
 ALTER TABLE ways
 DROP CONSTRAINT ways_source_fkey,
@@ -20,7 +21,7 @@ WHERE component != (
         FROM ways_vertices_pgr
         GROUP BY component
         ORDER BY component, COUNT) AS m
-ORDER BY COUNT DESC LIMIT 1);
+    ORDER BY COUNT DESC LIMIT 1);
 
 DELETE FROM ways a
 WHERE NOT EXISTS (

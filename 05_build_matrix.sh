@@ -4,9 +4,12 @@
 # Loading config variables
 base_dir="$(jq -r .base_dir config.json)"
 prompt="$(jq -r .prompt_to_overwrite config.json)"
-eval "$(jq -r ".package_versions | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
-eval "$(jq -r ".db_settings | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
-eval "$(jq -r ".routing_settings | to_entries | map(\"\(.key)=\(.value | tostring)\")|.[]" config.json)"
+eval "$(jq -r ".package_versions | to_entries | map(\"\(.key)=\(.value |
+    tostring)\")|.[]" config.json)"
+eval "$(jq -r ".db_settings | to_entries | map(\"\(.key)=\(.value |
+    tostring)\")|.[]" config.json)"
+eval "$(jq -r ".routing_settings | to_entries | map(\"\(.key)=\(.value |
+    tostring)\")|.[]" config.json)"
 tags="$(jq -r '.routing_settings.osm_way_tags | join(",")' config.json)"
 notify="$(jq -r .notification_settings.notify config.json)"
 
@@ -41,9 +44,9 @@ if [ -f "tag_extract.pbf" ]; then
             case $yn in
                 [Yy]* ) osmium tags-filter "$osm_filename" \
                 w/highway="$tags" \
-                    --overwrite \
+                --overwrite \
                 -o tag_extract.pbf; break;;
-            [Nn]* ) break;;
+                [Nn]* ) break;;
             * ) echo "Please answer yes or no.";;
             esac
         done
@@ -78,11 +81,6 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 		--f temp.osm \
 		--clean \
 		--password "$db_pass"
-
-
-
-    # Insert traffic stuff here
-
 
 	# Write default maxspeeds. Must be done every loop
 	psql -d "$db_name" -U "$db_user" -a -f "$osm_way_config"
