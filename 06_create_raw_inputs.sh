@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get necessary config vars and locs
-s3_path="s3://jsaxon-routing"
+s3_path="$(jq -r .docker_settings.s3_path config.json)"
 base_dir="$(jq -r .base_dir config.json)"
 
 eval "$(jq -r ".db_settings | to_entries | map(\"\(.key)=\(.value |
