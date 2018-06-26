@@ -12,11 +12,11 @@ BEGIN
     LOOP
         EXECUTE '
             UPDATE tracts SET osm_nn = id FROM (
-                SELECT DISTINCT ON (geoid) geoid, id
+                SELECT DISTINCT ON (tracts.geoid) tracts.geoid, id
                 FROM tracts, ways_vertices_pgr
                 WHERE osm_nn IS NULL AND
                 ST_DWithin(centroid, the_geom, ' || tol || ')
-                ORDER BY geoid, centroid <-> the_geom) knn
+                ORDER BY tracts.geoid, centroid <-> the_geom) knn
             WHERE tracts.geoid = knn.geoid;
         ';
 

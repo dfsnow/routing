@@ -17,3 +17,4 @@ raw
 *.mp4
 config.json
 DockerfileTemp
+*.bz2

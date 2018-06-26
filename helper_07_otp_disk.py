@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import time
 import json
+import csv
 
 # Importing the current county and config vars
 with open("config.json") as filename:
@@ -17,7 +18,7 @@ dep_date = datetime.strptime(
 dep_time = datetime.strptime(
     jsondata["otp_settings"]["departure_time"],
     "%H:%M:%S")
-geoid = os.environ.get('GEOID')
+geoid =
 
 # Instantiate an OtpsEntryPoint
 otp = OtpsEntryPoint.fromArgs(['--graphs', 'otp/graphs', '--router', geoid])
@@ -40,39 +41,31 @@ req.setDateTime(
 )                                       # set departure time
 req.setMaxTimeSec(maxtt)                # set a limit to maximum travel time
 req.setModes(modes)                     # define transport mode
-# req.maxWalkDistance = 3000            # set the maximum distance
-# req.walkSpeed = walkSpeed             # set average walking speed
-# req.bikeSpeed = bikeSpeed             # set average cycling speed
+req.maxWalkDistance = 5000              # set the maximum distance
 
 # CSV containing the columns GEOID, Y and X
 points = otp.loadCSVPopulation('points.csv', 'Y', 'X')
 dests = otp.loadCSVPopulation('points.csv', 'Y', 'X')
 
-# Create a CSV output
-csv = otp.createCSVOutput()
-csv.setHeader(['origin', 'destination', 'agg_cost', 'type'])
+# Writes directly to a CSV output file
+with open('matrix.csv', "wb") as csv_file:
+    writer = csv.writer(csv_file, delimiter=',')
+    for origin in points:
+        print "Processing origin: ", origin
+        req.setOrigin(origin)
+        spt = router.plan(req)
+        if spt is None: continue
 
-# Start Loop
-for origin in points:
-    print "Processing origin: ", origin
-    req.setOrigin(origin)
-    spt = router.plan(req)
-    if spt is None: continue
+        # Evaluate the SPT for all points
+        result = spt.eval(dests)
 
-    # Evaluate the SPT for all points
-    result = spt.eval(dests)
-
-    # Add a new row of result in the CSV output
-    for r in result:
-        csv.addRow([
-            origin.getStringData('GEOID'),
-            r.getIndividual().getStringData('GEOID'),
-            round(r.getTime() / 60, 2),  # time in minutes
-            2
-        ])
-
-# Save the result
-csv.save('matrix.csv')
+        # Add a new row of result in the CSV output
+        for r in result:
+            writer.writerow([
+                int(origin.getFloatData('GEOID')),
+                int(r.getIndividual().getFloatData('GEOID')),
+                round(r.getTime() / 60.0, 2)  # time in seconds
+            ])
 
 # Stop timing the code
 print("Elapsed time was %g seconds" % (time.time() - start_time))
