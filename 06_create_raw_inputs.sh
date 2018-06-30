@@ -32,7 +32,8 @@ fi
 
 
 for state in $(tail -n +2 states.csv | cut -d ',' -f 1); do
-    for x in $(find ./counties -name "$(printf %02d "$state")*.geojson" -type f | sort); do
+    for x in $(find ./counties -name "$(printf %02d "$state")*.geojson" -type f |
+        sort); do
 
         geoid=$(basename "$x" | cut -c 1-5)
         output_osm="$base_dir"/raw/osm/"$geoid".pbf
@@ -52,7 +53,7 @@ for state in $(tail -n +2 states.csv | cut -d ',' -f 1); do
             geom="$(jq -r .features[].geometry "$x")"
             psql -d "$db_name" -U "$db_user" -c "\COPY (
                 SELECT geoid, ST_X(centroid) AS X, ST_Y(centroid) AS Y,
-                    CASE WHEN geoid::text LIKE '$geoid%'
+                    CASE WHEN LPAD(geoid::text, 11, '0') LIKE '$geoid%'
                     THEN 2 ELSE 1 END AS dir
                 FROM tracts
                 WHERE ST_Contains(ST_SetSRID(

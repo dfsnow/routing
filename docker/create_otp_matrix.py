@@ -45,8 +45,8 @@ for origin in points:
     # Add a new row of result in the CSV output
     for r in result:
         csv.addRow([
-            int(origin.getStringData('GEOID')),
-            int(r.getIndividual().getStringData('GEOID')),
+            int(origin.getFloatData('GEOID')),
+            int(r.getIndividual().getFloatData('GEOID')),
             round(r.getTime() / 60.0, 2)  # time in minutes
         ])
 

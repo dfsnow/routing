@@ -80,7 +80,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 		-c "$osm2pg_mapconfig" \
 		--f temp.osm \
 		--clean \
-		--password "$db_pass"
+		--password "$db_password"
 
 	# Write default maxspeeds. Must be done every loop
 	psql -d "$db_name" -U "$db_user" -a -f "$osm_way_config"
