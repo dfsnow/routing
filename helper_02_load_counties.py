@@ -24,8 +24,8 @@ schema={
 }
 
 # Creating the URL to download the county shapefiles
-base_url = 'https://www2.census.gov/geo/tiger/TIGER' + str(year) + '/COUNTY/'
-base_file = 'tl_' + str(year) + '_us_county'
+base_url = 'https://www2.census.gov/geo/tiger/GENZ' + str(year) + '/shp/'
+base_file = 'cb_' + str(year) + '_us_county_500k'
 zip_file = base_file + '.zip'
 shp_file = base_file + '.shp'
 

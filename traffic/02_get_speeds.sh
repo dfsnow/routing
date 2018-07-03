@@ -2,17 +2,13 @@
 
 # Loading config variables
 base_dir="$(jq -r .base_dir ../config.json)"
-prompt="$(jq -r .prompt_to_overwrite ../config.json)"
-eval "$(jq -r ".package_versions | to_entries | map(\"\(.key)=\(.value |
-    tostring)\")|.[]" ../config.json)"
 eval "$(jq -r ".db_settings | to_entries | map(\"\(.key)=\(.value |
     tostring)\")|.[]" ../config.json)"
 eval "$(jq -r ".routing_settings | to_entries | map(\"\(.key)=\(.value |
     tostring)\")|.[]" ../config.json)"
 
 
-for i in $(cat rural_sample.csv); do
-    GEOID=$i
+for GEOID in $(cat urban_sample.csv); do
     x=$base_dir/counties/$GEOID.geojson
     echo "Now processing "$x""
 

@@ -68,7 +68,9 @@ def query_loop(df):
                 row["origin"],
                 row["destination"],
                 row["waypoint"],
-                api_key)
+                api_key,
+                dep_time,
+                "pessimistic")
             df.at[idx, "api_distance"] = distance
             df.at[idx, "api_duration"] = duration
             df.at[idx, "api_minutes"] = duration / 60

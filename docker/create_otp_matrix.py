@@ -5,7 +5,8 @@ import os
 
 # Importing the current county and config vars
 geoid = os.environ.get('GEOID')
-input_file = '/otp/' + str(geoid) + '-input.csv'
+input_file = '/otp/' + str(geoid) + '-dest.csv'
+step_file = '/otp/' + str(geoid) + '-orig.csv'
 output_file = '/otp/' + str(geoid) + '-output.csv'
 
 # Instantiate an OtpsEntryPoint
@@ -25,7 +26,7 @@ req.setModes('WALK,TRANSIT')            # define transport mode
 req.maxWalkDistance = 5000            # set the maximum distance
 
 # CSV containing the columns GEOID, X and Y.
-points = otp.loadCSVPopulation(input_file, 'Y', 'X')
+step = otp.loadCSVPopulation(step_file, 'Y', 'X')
 dests = otp.loadCSVPopulation(input_file, 'Y', 'X')
 
 # Create a CSV output
@@ -33,7 +34,7 @@ csv = otp.createCSVOutput()
 csv.setHeader(['origin', 'destination', 'agg_cost'])
 
 # Start Loop
-for origin in points:
+for origin in step:
     print "Processing origin: ", origin
     req.setOrigin(origin)
     spt = router.plan(req)

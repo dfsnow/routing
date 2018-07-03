@@ -14,7 +14,7 @@ from multiprocessing import Pool, cpu_count
 
 
 # Populating setup variables from the config file
-with open("../config.json") as filename:
+with open("/home/snow/routing/config.json") as filename:
     jsondata = json.load(filename)
 
 db = jsondata["db_settings"]
@@ -102,10 +102,10 @@ all_roads_gdf.plot(
 amin = min(paths_gdf['agg_cost']) # for frames
 amax = max(paths_gdf['agg_cost'])
 vmin = round(amin, -1) + 10 # for colorbar
-vmax = round(amax, -1) - 80
+vmax = round(amax, -1) - 170
 
 # Colorbar and axes creation
-cax = fig.add_axes([0.92, 0.6, 0.02, 0.2])
+cax = fig.add_axes([0.04, 0.20, 0.02, 0.2])
 norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
 cb = matplotlib.colorbar.ColorbarBase(
         cax, cmap="BuPu_r", norm=norm)
@@ -151,7 +151,7 @@ def create_frames(i):
         linewidth=0.3,
         figsize=figsize)
 
-    ax.text(0.98, 0.59,
+    ax.text(0.11, 0.04,
             '{} min.'.format(int(i / 60)),
             size=9,
             ha='right',

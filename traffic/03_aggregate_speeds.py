@@ -12,7 +12,7 @@ df = df[["tag_id", "maxspeed", "api_speed"]]
 
 df = df.groupby('tag_id').mean()
 
-tags = pd.read_csv('tags.csv')
+tags = pd.read_csv('helper_03_tags.csv')
 df = tags.merge(df, on='tag_id').sort_values('tag_id')
 
 df.to_csv("avg_speeds.csv", index=False)

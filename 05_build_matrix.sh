@@ -68,6 +68,12 @@ fi
 for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	echo "Now processing "$x""
 
+	# Creating env variables for use in matrix script
+    export GEOID="$(basename "$x" | cut -c 1-5)"
+	state="$(basename "$x" | cut -c 1-2)"
+	county="$(basename "$x" | cut -c 3-5)"
+
+    # Creating a geographic extract of the necessary area
 	osmium extract -p "$x" tag_extract.pbf \
 		--overwrite \
 		-o temp.osm
@@ -86,7 +92,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	psql -d "$db_name" -U "$db_user" -a -f "$osm_way_config"
 
 	# Deleting isolated ways and nodes
-	psql -d "$db_name" -U "$db_user" -a -f helper_05_connected_components.sql
+    psql -d "$db_name" -U "$db_user" -a -f helper_05_connected_components.sql
 
 	# KNN matching for all nodes in pgrouting table
 	cat helper_05_knn_match.sql \
@@ -96,11 +102,6 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 		> "helper_05_knn_match.sql.tmp"
 
 	psql -d "$db_name" -U "$db_user" -a -f helper_05_knn_match.sql.tmp
-
-	# Creating env variables for use in matrix script
-    export GEOID="$(basename "$x" | cut -c 1-5)"
-	state="$(basename "$x" | cut -c 1-2)"
-	county="$(basename "$x" | cut -c 3-5)"
 
     # Run OTP for transit if the necessary files exist in otp/graphs
     if [ -d otp/graphs/"$GEOID" ]; then
@@ -142,7 +143,7 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	psql -d "$db_name" -U "$db_user" -a -f helper_05_cost_matrix.sql.tmp
 
     # Remove all unneeded temp files
-	#rm *.sql.tmp points.csv matrix.csv "$base_dir"/otp/graphs/"$GEOID"/temp.osm
+	rm *.sql.tmp points.csv
 
 	# Keep for testing purposes
 	#read -p "Press Enter to continue" </dev/tty

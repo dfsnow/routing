@@ -14,7 +14,7 @@ FROM pgr_connectedComponents(
     'SELECT gid id, source, target, cost, reverse_cost FROM ways') b
 WHERE a.id = b.node;
 
-DELETE FROM ways_vertices_pgr 
+DELETE FROM ways_vertices_pgr
 WHERE component != (
     SELECT component FROM (
         SELECT DISTINCT ON (component) component, COUNT(*)

@@ -27,20 +27,12 @@ psql -d "$db_name" -U "$db_user" << EOD
         "statefp" smallint,
         "countyfp" smallint,
         "countyns" varchar(8),
+        "affgeoid" varchar(20),
         "geoid" varchar(5),
         "name" varchar(100),
-        "namelsad" varchar(100),
         "lsad" varchar(2),
-        "classfp" varchar(2),
-        "mtfcc" varchar(5),
-        "csafp" varchar(3),
-        "cbsafp" varchar(5),
-        "metdivfp" varchar(5),
-        "funcstat" varchar(1),
         "aland" float8,
-        "awater" float8,
-        "intptlat" float8,
-        "intptlon" float8
+        "awater" float8
         );
     SELECT AddGeometryColumn('public','counties','geom','4326','MULTIPOLYGON',2);
     SELECT AddGeometryColumn('public','counties','geom_buffer','4326','MULTIPOLYGON',2);
@@ -52,12 +44,12 @@ EOD
 # Load county shapefiles into database
 cd counties
 
-shp2pgsql -I -a -s 4269:4326 -W "latin1" tl_2015_us_county public.counties \
+shp2pgsql -I -a -s 4269:4326 -W "latin1" cb_2015_us_county_500k public.counties \
     | grep -v "GIST\|ANALYZE" \
     | psql -d "$db_name" -U "$db_user"
 
 shp2pgsql -c -s 4326:4326 -g geom_buffer -W \
-    "latin1" tl_2015_us_county_buffered public.counties_temp \
+    "latin1" cb_2015_us_county_500k_buffered public.counties_temp \
     | psql -d "$db_name" -U "$db_user"
 
 psql -d "$db_name" -U "$db_user" << EOD
@@ -77,16 +69,10 @@ psql -d "$db_name" -U "$db_user" << EOD
     ALTER TABLE counties
     DROP COLUMN gid,
     DROP COLUMN countyns,
-    DROP COLUMN namelsad,
+    DROP COLUMN affgeoid,
     DROP COLUMN lsad,
-    DROP COLUMN classfp,
-    DROP COLUMN mtfcc,
-    DROP COLUMN csafp,
-    DROP COLUMN cbsafp,
-    DROP COLUMN metdivfp,
-    DROP COLUMN funcstat,
-    DROP COLUMN intptlat,
-    DROP COLUMN intptlon;
+    DROP COLUMN awater,
+    DROP COLUMN aland;
 
     ALTER TABLE counties RENAME COLUMN statefp  TO state;
     ALTER TABLE counties RENAME COLUMN countyfp TO county;
