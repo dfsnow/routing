@@ -22,7 +22,7 @@ awk -F, '{ print $1,$3,$2 }' OFS=, /otp/$GEOID.csv >> /otp/$GEOID-dest.csv
 tail -n +2 /otp/$GEOID-dest.csv > /otp/$GEOID-temp.csv
 rows=$(cat /otp/$GEOID-temp.csv | wc -l)
 chunk_size=$(expr $rows / $STEPS)
-split -l $chunk_size -d /otp/$GEOID-temp.csv
+split -l $chunk_size -d /otp/$GEOID-temp.csv /otp/x
 echo "GEOID,Y,X" > /otp/$GEOID-orig.csv
 cat /otp/x$STEP >> /otp/$GEOID-orig.csv
 

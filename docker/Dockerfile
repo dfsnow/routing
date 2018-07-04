@@ -35,5 +35,5 @@ wget https://repo1.maven.org/maven2/org/opentripplanner/otp/$OTP_VERSION/otp-$OT
 COPY create_otp_matrix.py run_otp.sh /otp/
 RUN chmod +x /otp/run_otp.sh
 
-CMD /otp/run_otp.sh 
+CMD ["/bin/bash", "-c", "/otp/run_otp.sh"] 
 

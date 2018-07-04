@@ -22,15 +22,13 @@ psql -d "$db_name" -U "$db_user" << EOD
     DROP TABLE IF EXISTS "public"."tracts";
     CREATE TABLE "public"."tracts" (
         gid serial,
-        "statefp" smallint,
-        "countyfp" smallint,
-        "tractce" int,
-        "affgeoid" varchar(20),
-        "geoid" bigint,
-        "name" varchar(100),
-        "lsad" varchar(2),
-        "aland" float8,
-        "awater" float8
+        "geo_id" varchar(60),
+        "state" smallint,
+        "county" smallint,
+        "tract" int,
+        "name" varchar(90),
+        "lsad" varchar(7),
+        "censusarea" numeric
         );
     SELECT AddGeometryColumn('public','tracts','geom','4326','MULTIPOLYGON',2);
     COMMIT;
@@ -41,7 +39,7 @@ EOD
 # Load tract shapefiles into database
 cd tracts
 
-for x in $(ls cb_2015_*shp | sed "s/.shp//"); do
+for x in $(ls gz_2010_*shp | sed "s/.shp//"); do
   shp2pgsql -I -s 4269:4326 -a -W "latin1" $x public.tracts \
     | grep -v "GIST\|ANALYZE" \
     | psql -d "$db_name" -U "$db_user"
@@ -51,15 +49,12 @@ psql -d "$db_name" -U "$db_user" << EOD
 
     ALTER TABLE tracts
     DROP COLUMN gid,
-    DROP COLUMN affgeoid,
     DROP COLUMN name,
     DROP COLUMN lsad,
-    DROP COLUMN aland,
-    DROP COLUMN awater;
+    DROP COLUMN censusarea;
 
-    ALTER TABLE tracts RENAME COLUMN statefp  TO state;
-    ALTER TABLE tracts RENAME COLUMN countyfp TO county;
-    ALTER TABLE tracts RENAME COLUMN tractce  TO tract;
+    ALTER TABLE tracts RENAME COLUMN geo_id  TO geoid;
+    ALTER TABLE tracts ALTER COLUMN geoid TYPE bigint USING RIGHT(geoid, 11)::bigint;
     ALTER TABLE tracts ADD PRIMARY KEY (geoid);
 
     SELECT AddGeometryColumn('public','tracts','centroid','4326','POINT',2);

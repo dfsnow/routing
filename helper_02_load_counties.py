@@ -24,8 +24,8 @@ schema={
 }
 
 # Creating the URL to download the county shapefiles
-base_url = 'https://www2.census.gov/geo/tiger/GENZ' + str(year) + '/shp/'
-base_file = 'cb_' + str(year) + '_us_county_500k'
+base_url = 'https://www2.census.gov/geo/tiger/TIGER' + str(year) + '/COUNTY/' + str(year) + '/'
+base_file = 'tl_' + str(year) + '_us_county10'
 zip_file = base_file + '.zip'
 shp_file = base_file + '.shp'
 
@@ -52,9 +52,9 @@ gdf.to_file(os.path.join(rel_path, base_file + '_buffered.shp'),
 # Save each county as a separate GeoJSON to use as a boundary
 # file for osmium clipping
 for index, row in gdf.iterrows():
-    with fiona.open(os.path.join(rel_path, '{}.geojson'.format(row['GEOID'])), 'w',
+    with fiona.open(os.path.join(rel_path, '{}.geojson'.format(row['GEOID10'])), 'w',
         crs=from_epsg(4326), driver='GeoJSON', schema=schema) as output:
         output.write({
             'geometry': mapping(row['geometry']),
-            'properties': {'geoid': row['GEOID']}
+            'properties': {'geoid': row['GEOID10']}
         })

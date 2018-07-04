@@ -24,15 +24,23 @@ psql -d "$db_name" -U "$db_user" << EOD
     DROP TABLE IF EXISTS "public"."counties";
     CREATE TABLE "public"."counties" (
         gid serial,
-        "statefp" smallint,
-        "countyfp" smallint,
-        "countyns" varchar(8),
-        "affgeoid" varchar(20),
-        "geoid" varchar(5),
-        "name" varchar(100),
-        "lsad" varchar(2),
-        "aland" float8,
-        "awater" float8
+        "statefp10" smallint,
+        "countyfp10" smallint,
+        "countyns10" varchar(8),
+        "geoid10" varchar(5),
+        "name10" varchar(100),
+        "namelsad10" varchar(100),
+        "lsad10" varchar(2),
+        "classfp10" varchar(2),
+        "mtfcc10" varchar(5),
+        "csafp10" varchar(3),
+        "cbsafp10" varchar(5),
+        "metdivfp10" varchar(5),
+        "funcstat10" varchar(1),
+        "aland10" float8,
+        "awater10" float8,
+        "intptlat10" float8,
+        "intptlon10" float8
         );
     SELECT AddGeometryColumn('public','counties','geom','4326','MULTIPOLYGON',2);
     SELECT AddGeometryColumn('public','counties','geom_buffer','4326','MULTIPOLYGON',2);
@@ -44,12 +52,12 @@ EOD
 # Load county shapefiles into database
 cd counties
 
-shp2pgsql -I -a -s 4269:4326 -W "latin1" cb_2015_us_county_500k public.counties \
+shp2pgsql -I -a -s 4269:4326 -W "latin1" tl_2010_us_county10 public.counties \
     | grep -v "GIST\|ANALYZE" \
     | psql -d "$db_name" -U "$db_user"
 
 shp2pgsql -c -s 4326:4326 -g geom_buffer -W \
-    "latin1" cb_2015_us_county_500k_buffered public.counties_temp \
+    "latin1" tl_2010_us_county10_buffered public.counties_temp \
     | psql -d "$db_name" -U "$db_user"
 
 psql -d "$db_name" -U "$db_user" << EOD
@@ -57,7 +65,7 @@ psql -d "$db_name" -U "$db_user" << EOD
     UPDATE counties c
     SET geom_buffer = ct.geom_buffer
     FROM counties_temp ct
-    WHERE c.geoid = ct.geoid;
+    WHERE c.geoid10 = ct.geoid10;
 
     DROP TABLE counties_temp;
 
@@ -68,14 +76,24 @@ psql -d "$db_name" -U "$db_user" << EOD
 
     ALTER TABLE counties
     DROP COLUMN gid,
-    DROP COLUMN countyns,
-    DROP COLUMN affgeoid,
-    DROP COLUMN lsad,
-    DROP COLUMN awater,
-    DROP COLUMN aland;
+    DROP COLUMN countyns10,
+    DROP COLUMN namelsad10,
+    DROP COLUMN lsad10,
+    DROP COLUMN classfp10,
+    DROP COLUMN mtfcc10,
+    DROP COLUMN csafp10,
+    DROP COLUMN cbsafp10,
+    DROP COLUMN metdivfp10,
+    DROP COLUMN funcstat10,
+    DROP COLUMN aland10,
+    DROP COLUMN awater10,
+    DROP COLUMN intptlat10,
+    DROP COLUMN intptlon10;
 
-    ALTER TABLE counties RENAME COLUMN statefp  TO state;
-    ALTER TABLE counties RENAME COLUMN countyfp TO county;
+    ALTER TABLE counties RENAME COLUMN name10     TO name;
+    ALTER TABLE counties RENAME COLUMN statefp10  TO state;
+    ALTER TABLE counties RENAME COLUMN countyfp10 TO county;
+    ALTER TABLE counties RENAME COLUMN geoid10    TO geoid;
     ALTER TABLE counties ADD PRIMARY KEY (geoid);
 
     CREATE INDEX ON "public"."counties" USING GIST ("geom");

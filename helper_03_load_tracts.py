@@ -20,8 +20,8 @@ rel_path = "tracts/"
 
 # Downloading and unzipping the tracts for each state
 for fip in states['fip']:
-    base_url = "https://www2.census.gov/geo/tiger/GENZ" + str(year) + "/shp/"
-    base_file = "cb_" + str(year) + "_" + str(fip).zfill(2) + "_tract_500k"
+    base_url = "https://www2.census.gov/geo/tiger/GENZ" + str(year) + "/"
+    base_file = "gz_" + str(year) + "_" + str(fip).zfill(2) + "_140_00_500k"
     zip_file = base_file + ".zip"
     shp_file = base_file + ".shp"
 
