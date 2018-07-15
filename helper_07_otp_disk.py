@@ -18,7 +18,7 @@ dep_date = datetime.strptime(
 dep_time = datetime.strptime(
     jsondata["otp_settings"]["departure_time"],
     "%H:%M:%S")
-geoid = "36061"
+geoid = "53033"
 
 # Instantiate an OtpsEntryPoint
 otp = OtpsEntryPoint.fromArgs(['--graphs', 'otp/graphs', '--router', geoid])

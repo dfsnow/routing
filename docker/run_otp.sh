@@ -40,4 +40,8 @@ java -jar /otp/jython-standalone-$JYTHON_VERSION.jar \
     /otp/create_otp_matrix.py
 
 # Save the matrix back to S3
-s3cmd put /otp/$GEOID-output.csv s3://jsaxon-routing/output/$GEOID-$STEP-otp.csv
+if [ -n "$STEPS" ] && [ -n "$STEP" ]; then
+    s3cmd put /otp/$GEOID-output.csv s3://jsaxon-routing/output/$GEOID-$STEP-otp.csv
+else
+    s3cmd put /otp/$GEOID-output.csv s3://jsaxon-routing/output/$GEOID-otp.csv
+fi
