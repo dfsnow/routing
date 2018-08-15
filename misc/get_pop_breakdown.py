@@ -3,7 +3,7 @@
 import pandas as pd
 import requests
 
-year = 2016
+year = 2010
 fips = pd.read_csv('states.csv')['fip']
 
 
