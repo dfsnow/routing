@@ -8,7 +8,7 @@ eval "$(jq -r ".db_settings | to_entries | map(\"\(.key)=\(.value |
     tostring)\")|.[]" ../config.json)"
 
 
-for ur in urban; do
+for ur in rural; do
     for GEOID in $(cat "$ur"/"$ur"_sample.csv); do
         output_csv="$ur"/"$GEOID".csv
 

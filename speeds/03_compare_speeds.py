@@ -116,8 +116,6 @@ def query_bing_api(origin, destination, api_key, departure_time=None, traffic_mo
         url = bing_base_url + \
            "wp.0={}&wp.1={}&routeAttributes=routeSummariesOnly&key={}".format(
             origin, destination, api_key)
-
-    print(url)
     try:
         response = requests.get(url).json()["resourceSets"][0]["resources"][0]
         distance = response["travelDistance"]
@@ -126,7 +124,6 @@ def query_bing_api(origin, destination, api_key, departure_time=None, traffic_mo
     except:
         raise ValueError('No results for way.')
 
-geoid="17031"
 
 def query_loop(df):
     """ Loop through rows and append query info to dataframe """
@@ -165,7 +162,7 @@ def query_loop(df):
             df.at[idx, "osrm_api_distance"] = osrm_distance
             df.at[idx, "osrm_api_minutes"] = osrm_duration / 60
 
-            df.at[idx, "bing_api_distance"] = bing_distance
+            df.at[idx, "bing_api_distance"] = bing_distance * 1000  # Bing returned km
             df.at[idx, "bing_api_minutes"] = bing_duration / 60
 
         except:
