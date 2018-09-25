@@ -5,8 +5,9 @@ CREATE TABLE sample AS (
         SELECT *
         FROM times 
         WHERE LPAD(origin::text, 11, '0') LIKE '$geoid%'
+        AND LPAD(destination::text, 11, '0') LIKE '$geoid%'
         ORDER BY random()
-        LIMIT 20
+        LIMIT 30
     )
     SELECT *
     FROM points
