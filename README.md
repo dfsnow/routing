@@ -53,4 +53,4 @@ for x in $list_of_county_geoids; do
 done
 ```
 
-The input files will be downloaded from S3, the container will perform its work, and the output CSV matrix will be put in a folder on S3 named output, with each county file named after its FIPS code and appended with `-otp`.
+The input files will be downloaded from S3, the container will perform its work, and the output CSV matrix will be put in a folder on S3 named `output`, with each county file named after its FIPS code and appended with `-otp`.
