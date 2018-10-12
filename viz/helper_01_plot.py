@@ -102,10 +102,10 @@ all_roads_gdf.plot(
 amin = min(paths_gdf['agg_cost']) # for frames
 amax = max(paths_gdf['agg_cost'])
 vmin = round(amin, -1) + 10 # for colorbar
-vmax = round(amax, -1) - 170
+vmax = round(amax, -1) - 90
 
 # Colorbar and axes creation
-cax = fig.add_axes([0.04, 0.20, 0.02, 0.2])
+cax = fig.add_axes([0.90, 0.50, 0.02, 0.3])
 norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
 cb = matplotlib.colorbar.ColorbarBase(
         cax, cmap="BuPu_r", norm=norm)
@@ -151,7 +151,7 @@ def create_frames(i):
         linewidth=0.3,
         figsize=figsize)
 
-    ax.text(0.11, 0.04,
+    ax.text(0.96, 0.44,
             '{} min.'.format(int(i / 60)),
             size=9,
             ha='right',
@@ -171,7 +171,7 @@ rmax = (int(amax) + 1) * 60
 rstep = int(rmax / (mov_length * framerate))
 
 # Multiprocessing function loop over created range
-pool = Pool(cpu_count())
+pool = Pool(cpu_count() / 2)
 pool.map(create_frames, range(rmin, rmax, rstep))
 
 connection.close()

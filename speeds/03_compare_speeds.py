@@ -36,6 +36,8 @@ points["origin_r"] = points["olon"].map(str) + "," + points["olat"].map(str)
 points["destination_r"] = points["dlon"].map(str) + "," + points["dlat"].map(str)
 points = points.drop(columns=["olat", "olon", "dlat", "dlon"])
 
+##### Killed these keys after accidental commit #####
+
 ### Internet things and APIs
 # Getting Google api details
 google_base_url = "https://maps.googleapis.com/maps/api/directions/json?"

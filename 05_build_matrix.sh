@@ -104,36 +104,36 @@ for x in $(find ./counties -name "*.geojson" -type f | sort); do
 	psql -d "$db_name" -U "$db_user" -a -f helper_05_knn_match.sql.tmp
 
     # Run OTP for transit if the necessary files exist in otp/graphs
-    if [ -d otp/graphs/"$GEOID" ]; then
-
-        # Generate a matrix for OTP to use
-        psql -d "$db_name" -U "$db_user" -c "\COPY (
-            SELECT geoid, ST_Y(centroid) AS Y, ST_X(centroid) AS X
-            FROM tracts
-            WHERE osm_nn IS NOT NULL
-        ) TO 'points.csv' DELIMITER ',' CSV HEADER;"
-        sed -i '1s/.*/\U&/' points.csv
-
-        # Symlink the OSM to the necessary folder for OTP
-        ln -s "$base_dir"/temp.osm "$base_dir"/otp/graphs/"$GEOID"
-
-        # Build the OTP graph object
-        java -jar otp/otp-"$otp_major"-shaded.jar \
-            --cache otp/ \
-            --basePath otp/ \
-            --build otp/graphs/"$GEOID"
-
-        # Process OTP graph
-        java -jar otp/jython-standalone-"$jython_major".jar \
-            -Dpython.path=otp/otp-"$otp_major"-shaded.jar \
-            helper_05_otp.py
-
-        psql -d "$db_name" -U "$db_user" -c \
-            "\COPY times (origin, destination, agg_cost, type)
-              FROM 'matrix.csv' DELIMITER ',' CSV HEADER;"
-
-    fi
-
+#    if [ -d otp/graphs/"$GEOID" ]; then
+#
+#        # Generate a matrix for OTP to use
+#        psql -d "$db_name" -U "$db_user" -c "\COPY (
+#            SELECT geoid, ST_Y(centroid) AS Y, ST_X(centroid) AS X
+#            FROM tracts
+#            WHERE osm_nn IS NOT NULL
+#        ) TO 'points.csv' DELIMITER ',' CSV HEADER;"
+#        sed -i '1s/.*/\U&/' points.csv
+#
+#        # Symlink the OSM to the necessary folder for OTP
+#        ln -s "$base_dir"/temp.osm "$base_dir"/otp/graphs/"$GEOID"
+#
+#        # Build the OTP graph object
+#        java -jar otp/otp-"$otp_major"-shaded.jar \
+#            --cache otp/ \
+#            --basePath otp/ \
+#            --build otp/graphs/"$GEOID"
+#
+#        # Process OTP graph
+#        java -jar otp/jython-standalone-"$jython_major".jar \
+#            -Dpython.path=otp/otp-"$otp_major"-shaded.jar \
+#            helper_05_otp.py
+#
+#        psql -d "$db_name" -U "$db_user" -c \
+#            "\COPY times (origin, destination, agg_cost, type)
+#              FROM 'matrix.csv' DELIMITER ',' CSV HEADER;"
+#
+#    fi
+#
 	# Creating the final cost matrix and writing to a results table
 	cat helper_05_cost_matrix.sql \
 		| sed "s/\$state/$state/g" \
