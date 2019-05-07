@@ -29,9 +29,14 @@ if [ -n "$STEPS" ] && [ -n "$STEP" ]; then
     chunk_size=$(expr $rows / $STEPS)
     split -l $chunk_size -d /otp/$GEOID-temp.csv /otp/x
     echo "GEOID,Y,X" > /otp/$GEOID-orig.csv
-    cat /otp/x$STEP >> /otp/$GEOID-orig.csv
+    cat /otp/x$STEP \
+        | awk -F, '$1 ~ /^'$GEOID'/' \
+        >> /otp/$GEOID-orig.csv
 else
-    cat /otp/$GEOID-dest.csv > /otp/$GEOID-orig.csv
+    echo "GEOID,Y,X" > /otp/$GEOID-orig.csv
+    cat /otp/$GEOID-dest.csv \
+        | awk -F, '$1 ~ /^'$GEOID'/' \
+        >> /otp/$GEOID-orig.csv
 fi
 
 # Create the OTP matrix
